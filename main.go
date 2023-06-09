@@ -4,22 +4,45 @@ import (
 	"fmt"
 	_ "go-web/database"
 	"go-web/file"
+	"go-web/session"
 	"html/template"
 	"log"
 	"net/http"
 	"strings"
 )
 
+var globalSessions *session.Manager
+
+func init() {
+	log.Println("init manager")
+	globalSessions, _ = session.NewManager("memory", "gosessionid", 3600)
+	log.Println(globalSessions)
+}
+
+func sessionLogin(w http.ResponseWriter, r *http.Request) {
+	sess := globalSessions.SessionStart(w, r)
+	r.ParseForm()
+	if r.Method == "GET" {
+		log.Println("GET REQUEST")
+		t, _ := template.ParseFiles("login.gtpl")
+		w.Header().Set("Content-Type", "text/html")
+		t.Execute(w, sess.Get("username"))
+	} else {
+		sess.Set("username", r.Form["username"])
+		http.Redirect(w, r, "/", 302)
+	}
+
+}
+
 func main() {
 	http.HandleFunc("/sayHelloName", sayHello)
+	http.HandleFunc("/sessionLogin", sessionLogin)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/upload", file.Upload)
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Fatal("listenAndServer:", err)
 	}
-
-	file.Simulation()
 }
 
 func sayHello(w http.ResponseWriter, r *http.Request) {

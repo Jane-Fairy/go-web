@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	databaseconn()
+	//databaseconn()
 }
 
 func databaseconn() {
