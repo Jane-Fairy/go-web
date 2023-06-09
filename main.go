@@ -18,7 +18,7 @@ func init() {
 
 	log.Println("init manager")
 	globalSessions, _ = session.NewManager("memory", "gosessionid", 3600)
-
+	globalSessions.GC() // 定期清除过期的session
 	log.Println(globalSessions)
 }
 

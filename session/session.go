@@ -14,8 +14,14 @@ import (
 type Manager struct {
 	cookieName  string
 	lock        sync.Mutex
-	provider    Provider
+	Provider    Provider
 	maxLifeTime int64
+}
+
+func (manager *Manager) GC() {
+	manager.lock.Lock()
+	defer manager.lock.Unlock()
+	time.AfterFunc(time.Duration(manager.maxLifeTime), func() { manager.Provider.SessionGC(manager.maxLifeTime) })
 }
 
 var provides = make(map[string]Provider)
