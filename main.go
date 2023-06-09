@@ -9,13 +9,16 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 )
 
 var globalSessions *session.Manager
 
 func init() {
+
 	log.Println("init manager")
 	globalSessions, _ = session.NewManager("memory", "gosessionid", 3600)
+
 	log.Println(globalSessions)
 }
 
@@ -70,4 +73,14 @@ func login(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("password:", r.Form["password"])
 	}
 
+}
+
+func count(w http.ResponseWriter, r *http.Request) {
+	session := globalSessions.SessionStart(w, r)
+	createTime := session.Get("create_time")
+	if createTime == nil {
+		session.Set("create_time", time.Now().Unix())
+	} else if (createTime.(int64) + 360) < (time.Now().Unix()) {
+
+	}
 }

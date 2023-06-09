@@ -3,10 +3,12 @@ package session
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"go-web/util"
 	"log"
 	"net/http"
 	"net/url"
 	"sync"
+	"time"
 )
 
 type Manager struct {
@@ -83,5 +85,21 @@ func (manager *Manager) SessionStart(w http.ResponseWriter, r *http.Request) (se
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (manager *Manager) SessionDestroy(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie(manager.cookieName)
+	ok := util.CheckErr(err)
+	if ok || cookie.Value == "" {
+		return
+	} else {
+		manager.lock.Lock()
+		defer manager.lock.Unlock()
+		manager.provider.SessionDestroy(cookie.Value)
+		expiration := time.Now()
+		cookie := http.Cookie{Name: manager.cookieName, Path: "/", HttpOnly: true, Expires: expiration, MaxAge: -1}
+		http.SetCookie(w, &cookie)
+	}
 
 }
