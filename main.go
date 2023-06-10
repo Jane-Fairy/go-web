@@ -5,6 +5,7 @@ import (
 	_ "go-web/database"
 	"go-web/file"
 	"go-web/session"
+	_ "go-web/socket"
 	"html/template"
 	"log"
 	"net/http"

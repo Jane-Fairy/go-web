@@ -36,7 +36,7 @@ func NewManager(provideName, cookieName string, maxLifeTime int64) (*Manager, er
 	return &Manager{
 		cookieName: cookieName,
 		//lock:        sync.Mutex{},
-		provider:    provider,
+		Provider:    provider,
 		maxLifeTime: maxLifeTime,
 	}, nil
 }
@@ -80,12 +80,12 @@ func (manager *Manager) SessionStart(w http.ResponseWriter, r *http.Request) (se
 	cookie, err := r.Cookie(manager.cookieName)
 	if err != nil || cookie.Value == "" {
 		sessionId := manager.sessionId()
-		manager.provider.SessionInit(sessionId) //session is not use.
+		manager.Provider.SessionInit(sessionId) //session is not use.
 		cookie := http.Cookie{Name: manager.cookieName, Value: url.QueryEscape(sessionId), Path: "/", HttpOnly: true, MaxAge: int(manager.maxLifeTime)}
 		http.SetCookie(w, &cookie)
 	} else {
 		sessionid, _ := url.QueryUnescape(cookie.Value)
-		session, _ = manager.provider.SessionRead(sessionid)
+		session, _ = manager.Provider.SessionRead(sessionid)
 	}
 	return
 }
@@ -102,7 +102,7 @@ func (manager *Manager) SessionDestroy(w http.ResponseWriter, r *http.Request) {
 	} else {
 		manager.lock.Lock()
 		defer manager.lock.Unlock()
-		manager.provider.SessionDestroy(cookie.Value)
+		manager.Provider.SessionDestroy(cookie.Value)
 		expiration := time.Now()
 		cookie := http.Cookie{Name: manager.cookieName, Path: "/", HttpOnly: true, Expires: expiration, MaxAge: -1}
 		http.SetCookie(w, &cookie)
