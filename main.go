@@ -2,50 +2,49 @@ package main
 
 import (
 	"fmt"
-	_ "go-web/database"
-	"go-web/file"
-	"go-web/session"
-	_ "go-web/socket"
+	"go-web/socket"
+	web "golang.org/x/net/websocket"
 	"html/template"
 	"log"
 	"net/http"
 	"strings"
-	"time"
 )
 
-var globalSessions *session.Manager
-
-func init() {
-
-	log.Println("init manager")
-	globalSessions, _ = session.NewManager("memory", "gosessionid", 3600)
-	globalSessions.GC() // 定期清除过期的session
-	log.Println(globalSessions)
-}
-
-func sessionLogin(w http.ResponseWriter, r *http.Request) {
-	sess := globalSessions.SessionStart(w, r)
-	r.ParseForm()
-	if r.Method == "GET" {
-		log.Println("GET REQUEST")
-		t, _ := template.ParseFiles("login.gtpl")
-		w.Header().Set("Content-Type", "text/html")
-		t.Execute(w, sess.Get("username"))
-	} else {
-		sess.Set("username", r.Form["username"])
-		http.Redirect(w, r, "/", 302)
-	}
-
-}
+//var globalSessions *session.Manager
+//
+//
+//
+//func sessionLogin(w http.ResponseWriter, r *http.Request) {
+//	sess := globalSessions.SessionStart(w, r)
+//	r.ParseForm()
+//	if r.Method == "GET" {
+//		log.Println("GET REQUEST")
+//		t, _ := template.ParseFiles("login.gtpl")
+//		w.Header().Set("Content-Type", "text/html")
+//		t.Execute(w, sess.Get("username"))
+//	} else {
+//		sess.Set("username", r.Form["username"])
+//		http.Redirect(w, r, "/", 302)
+//	}
+//
+//}
 
 func main() {
-	http.HandleFunc("/sayHelloName", sayHello)
-	http.HandleFunc("/sessionLogin", sessionLogin)
-	http.HandleFunc("/login", login)
-	http.HandleFunc("/upload", file.Upload)
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		log.Fatal("listenAndServer:", err)
+	//http.Handle("/", web.Handler(socket.Echo))
+	//
+	//http.HandleFunc("/sayHelloName", sayHello)
+	////http.HandleFunc("/sessionLogin", sessionLogin)
+	//http.HandleFunc("/login", login)
+	//http.HandleFunc("/upload", file.Upload)
+	//err := http.ListenAndServe(":8080", nil)
+	//if err != nil {
+	//	log.Fatal("listenAndServer:", err)
+	//}
+
+	http.Handle("/", web.Handler(socket.Echo))
+
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatal("ListenAndServe:", err)
 	}
 }
 
@@ -76,12 +75,12 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func count(w http.ResponseWriter, r *http.Request) {
-	session := globalSessions.SessionStart(w, r)
-	createTime := session.Get("create_time")
-	if createTime == nil {
-		session.Set("create_time", time.Now().Unix())
-	} else if (createTime.(int64) + 360) < (time.Now().Unix()) {
-
-	}
-}
+//func count(w http.ResponseWriter, r *http.Request) {
+//	session := globalSessions.SessionStart(w, r)
+//	createTime := session.Get("create_time")
+//	if createTime == nil {
+//		session.Set("create_time", time.Now().Unix())
+//	} else if (createTime.(int64) + 360) < (time.Now().Unix()) {
+//
+//	}
+//}
